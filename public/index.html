@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build LLM Prompt - Prompt Builder for Software Engineering</title>
+    <meta name="description" content="Create structured prompts for Claude Code, Codex, and other AI coding assistants. Fine-tune tool preferences and behavior settings.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.3); border-radius: 4px; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 16px 24px;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .section-header label {
+            margin-bottom: 0;
+        }
+
+        .platform-toggle {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            padding: 3px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .platform-option {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .platform-option:hover { color: #888; }
+        .platform-option.active {
+            background: linear-gradient(135deg, #00d4ff, #0088aa);
+            color: #000;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 24px;
+            padding: 20px 24px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                overflow-y: auto;
+            }
+            .header {
+                flex-wrap: wrap;
+            }
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            flex-shrink: 0;
+        }
+
+        .section.flex-grow {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+        }
+
+        label {
+            display: block;
+            color: #00d4ff;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            font-family: "SF Mono", Monaco, Consolas, monospace;
+            font-size: 14px;
+            padding: 14px;
+            resize: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .output-textarea {
+            background: rgba(0, 50, 0, 0.2);
+            border-color: rgba(0, 255, 100, 0.3);
+            flex: 1;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-label {
+            min-width: 140px;
+            font-size: 14px;
+            color: #00d4ff;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #00d4ff, #0088aa);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        .slider-value {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 600px) {
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tool-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+
+        .tool-item label {
+            min-width: 60px;
+            margin-bottom: 0;
+            font-size: 11px;
+        }
+
+        .tool-item input[type="range"] {
+            flex: 1;
+            height: 4px;
+            max-width: 80px;
+        }
+
+        .tool-item .slider-value {
+            font-size: 11px;
+            padding: 2px 6px;
+            min-width: 24px;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .checkbox-item:hover {
+            background: rgba(0, 212, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.2);
+        }
+
+        .checkbox-item.checked {
+            background: rgba(0, 212, 255, 0.15);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(0, 212, 255, 0.4);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            margin-top: 1px;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked {
+            background: linear-gradient(135deg, #00d4ff, #0088aa);
+            border-color: #00d4ff;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked::after {
+            content: '\2713';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .checkbox-content { flex: 1; }
+        .checkbox-label { color: #e0e0e0; font-size: 14px; font-weight: 600; display: block; }
+        .checkbox-desc { color: #888; font-size: 11px; margin-top: 2px; }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0088aa);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            color: #000;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #00ff88, #00aa55);
+            color: #000;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .toast.visible { opacity: 1; }
+
+        .footer {
+            padding: 12px 24px;
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <span class="logo">Build LLM Prompt</span>
+        <span class="tagline">Prompt builder for software engineering</span>
+    </header>
+
+    <main class="main-content">
+        <div class="column">
+            <div class="section">
+                <div class="slider-row">
+                    <span class="slider-label">Exploration Scope</span>
+                    <input type="range" id="scope-slider" min="1" max="10" value="5">
+                    <span class="slider-value" id="scope-value">5</span>
+                </div>
+                <div class="hint">Low: stay focused | High: explore codebase</div>
+            </div>
+
+            <div class="section">
+                <div class="slider-row">
+                    <span class="slider-label">Ask Questions</span>
+                    <input type="range" id="ask-slider" min="1" max="10" value="5">
+                    <span class="slider-value" id="ask-value">5</span>
+                </div>
+                <div class="hint">Low: execute now | High: plan first</div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    <label>Tool Preferences</label>
+                    <div class="platform-toggle">
+                        <span class="platform-option active" data-mode="claude_code" onclick="setPlatform('claude_code')">Claude Code</span>
+                        <span class="platform-option" data-mode="codex" onclick="setPlatform('codex')">Codex CLI</span>
+                    </div>
+                </div>
+                <div class="tool-grid" id="tool-grid"></div>
+                <div class="hint">Adjust how much to use each tool (1=avoid, 10=prefer)</div>
+            </div>
+
+            <div class="section">
+                <label>Behavior</label>
+                <div class="checkbox-grid" id="behavior-grid"></div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="section">
+                <label>Your Task</label>
+                <textarea id="task-input" placeholder="Describe what you want to build or fix..." style="height: 140px;"></textarea>
+            </div>
+
+            <div class="section flex-grow">
+                <label>Generated Prompt</label>
+                <textarea id="output" class="output-textarea" readonly placeholder="Click Generate to create your prompt..."></textarea>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-primary" onclick="generatePrompt()">Generate</button>
+                <button class="btn-success" onclick="copyPrompt()">Copy</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <span>100% client-side. Nothing leaves your browser. <a href="view-source:" onclick="viewSource(event)">View source</a> to verify.</span>
+        <a href="https://github.com/charignon/prompt_factory" target="_blank">GitHub</a>
+    </footer>
+
+    <div class="toast" id="toast">Copied!</div>
+
+    <script>
+        // State
+        var currentPlatform = 'claude_code';
+        var toolValues = {};
+        var checkedBehaviors = {};
+
+        // Tool definitions per platform
+        var toolDefinitions = {
+            claude_code: [
+                { id: 'read', name: 'Read' },
+                { id: 'edit', name: 'Edit' },
+                { id: 'write', name: 'Write' },
+                { id: 'bash', name: 'Bash' },
+                { id: 'glob', name: 'Glob' },
+                { id: 'grep', name: 'Grep' },
+                { id: 'task', name: 'Task' },
+                { id: 'websearch', name: 'Web' },
+                { id: 'todowrite', name: 'Todo' }
+            ],
+            codex: [
+                { id: 'shell', name: 'Shell' },
+                { id: 'patch', name: 'Patch' },
+                { id: 'read', name: 'Read' },
+                { id: 'write', name: 'Write' },
+                { id: 'plan', name: 'Plan' }
+            ]
+        };
+
+        // Behavior options
+        var behaviorOptions = [
+            {
+                id: 'noStalling',
+                label: 'No Stalling',
+                desc: 'Complete without pausing',
+                instruction: 'Do NOT pause to summarize or wait for confirmation. Complete the entire task.'
+            },
+            {
+                id: 'askFirst',
+                label: 'Ask First',
+                desc: 'Clarify before coding',
+                instruction: 'Before implementing, ask 3-5 clarifying questions about requirements.'
+            },
+            {
+                id: 'tightScope',
+                label: 'Tight Scope',
+                desc: 'Minimal implementation',
+                instruction: 'Implement ONLY what is requested. Keep the solution minimal.'
+            },
+            {
+                id: 'exploreFirst',
+                label: 'Explore First',
+                desc: 'Understand codebase',
+                instruction: 'BEFORE writing code, explore the codebase to understand patterns.'
+            }
+        ];
+
+        // Helper to clear element children safely
+        function clearChildren(element) {
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
+        }
+
+        function init() {
+            // Initialize tool values for all platforms
+            Object.keys(toolDefinitions).forEach(function(platform) {
+                toolDefinitions[platform].forEach(function(tool) {
+                    toolValues[tool.id] = 5;
+                });
+            });
+
+            renderToolGrid();
+            renderBehaviorGrid();
+
+            // Slider event listeners
+            document.getElementById('scope-slider').addEventListener('input', function() {
+                document.getElementById('scope-value').textContent = this.value;
+            });
+
+            document.getElementById('ask-slider').addEventListener('input', function() {
+                document.getElementById('ask-value').textContent = this.value;
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.metaKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    generatePrompt();
+                }
+            });
+        }
+
+        function setPlatform(mode) {
+            currentPlatform = mode;
+            document.querySelectorAll('.platform-option').forEach(function(opt) {
+                opt.classList.toggle('active', opt.dataset.mode === mode);
+            });
+            renderToolGrid();
+        }
+
+        function renderToolGrid() {
+            var grid = document.getElementById('tool-grid');
+            clearChildren(grid);
+
+            toolDefinitions[currentPlatform].forEach(function(tool) {
+                var item = document.createElement('div');
+                item.className = 'tool-item';
+
+                var lbl = document.createElement('label');
+                lbl.textContent = tool.name;
+
+                var slider = document.createElement('input');
+                slider.type = 'range';
+                slider.min = '1';
+                slider.max = '10';
+                slider.value = toolValues[tool.id] || 5;
+
+                var val = document.createElement('span');
+                val.className = 'slider-value';
+                val.textContent = toolValues[tool.id] || 5;
+
+                item.appendChild(lbl);
+                item.appendChild(slider);
+                item.appendChild(val);
+                grid.appendChild(item);
+
+                slider.addEventListener('input', function() {
+                    val.textContent = this.value;
+                    toolValues[tool.id] = parseInt(this.value);
+                });
+            });
+        }
+
+        function renderBehaviorGrid() {
+            var grid = document.getElementById('behavior-grid');
+            clearChildren(grid);
+
+            behaviorOptions.forEach(function(opt) {
+                var item = document.createElement('div');
+                item.className = 'checkbox-item';
+
+                var cb = document.createElement('input');
+                cb.type = 'checkbox';
+
+                var content = document.createElement('div');
+                content.className = 'checkbox-content';
+
+                var lbl = document.createElement('span');
+                lbl.className = 'checkbox-label';
+                lbl.textContent = opt.label;
+
+                var desc = document.createElement('span');
+                desc.className = 'checkbox-desc';
+                desc.textContent = opt.desc;
+
+                content.appendChild(lbl);
+                content.appendChild(desc);
+                item.appendChild(cb);
+                item.appendChild(content);
+                grid.appendChild(item);
+
+                item.addEventListener('click', function(e) {
+                    if (e.target !== cb) cb.checked = !cb.checked;
+                    checkedBehaviors[opt.id] = cb.checked;
+                    item.classList.toggle('checked', cb.checked);
+                });
+            });
+        }
+
+        function generatePrompt() {
+            var task = document.getElementById('task-input').value.trim();
+            if (!task) {
+                document.getElementById('output').value = 'Please enter a task first.';
+                return;
+            }
+
+            var scope = parseInt(document.getElementById('scope-slider').value);
+            var ask = parseInt(document.getElementById('ask-slider').value);
+
+            var prompt = '== EXECUTION MODE ==\n';
+
+            // Scope instructions
+            if (scope <= 3) {
+                prompt += 'SCOPE: Minimal - Write self-contained code. Do NOT explore the codebase.\n';
+            } else if (scope <= 6) {
+                prompt += 'SCOPE: Moderate - Check related files if needed.\n';
+            } else {
+                prompt += 'SCOPE: Comprehensive - Thoroughly analyze codebase before implementing.\n';
+            }
+
+            // Process instructions
+            if (ask <= 3) {
+                prompt += 'PROCESS: Execute immediately. No planning.\n';
+            } else if (ask <= 6) {
+                prompt += 'PROCESS: Brief plan, then implement.\n';
+            } else {
+                prompt += 'PROCESS: Detailed planning. Ask clarifying questions first.\n';
+            }
+
+            // Tool preferences
+            var prefs = [];
+            toolDefinitions[currentPlatform].forEach(function(tool) {
+                var v = toolValues[tool.id] || 5;
+                if (v <= 2) {
+                    prefs.push({ name: tool.name, level: 'avoid' });
+                } else if (v >= 8) {
+                    prefs.push({ name: tool.name, level: 'prefer' });
+                }
+            });
+
+            if (prefs.length > 0) {
+                prompt += '\n== TOOL PREFERENCES ==\n';
+                var prefer = prefs.filter(function(t) { return t.level === 'prefer'; });
+                var avoid = prefs.filter(function(t) { return t.level === 'avoid'; });
+
+                if (prefer.length > 0) {
+                    prompt += 'PREFER: ' + prefer.map(function(t) { return t.name; }).join(', ') + '\n';
+                }
+                if (avoid.length > 0) {
+                    prompt += 'AVOID: ' + avoid.map(function(t) { return t.name; }).join(', ') + '\n';
+                }
+            }
+
+            // Behavior
+            var activeBehaviors = behaviorOptions.filter(function(opt) {
+                return checkedBehaviors[opt.id];
+            });
+
+            if (activeBehaviors.length > 0) {
+                prompt += '\n== BEHAVIOR ==\n';
+                activeBehaviors.forEach(function(opt) {
+                    prompt += '- ' + opt.instruction + '\n';
+                });
+            }
+
+            // Task
+            prompt += '\n== TASK ==\n' + task;
+
+            document.getElementById('output').value = prompt;
+        }
+
+        function copyPrompt() {
+            var text = document.getElementById('output').value;
+            if (!text) {
+                showToast('Generate a prompt first');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied!');
+            }).catch(function(err) {
+                showToast('Copy failed');
+                console.error('Copy failed:', err);
+            });
+        }
+
+        function showToast(msg) {
+            var toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('visible');
+            setTimeout(function() {
+                toast.classList.remove('visible');
+            }, 1500);
+        }
+
+        function viewSource(e) {
+            e.preventDefault();
+            window.location.href = 'view-source:' + window.location.href;
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
