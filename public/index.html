@@ -12,11 +12,15 @@
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
         ::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.3); border-radius: 4px; }
 
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: #e0e0e0;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -26,7 +30,7 @@
             align-items: center;
             background: rgba(0, 0, 0, 0.4);
             border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-            padding: 16px 24px;
+            padding: 12px 20px;
             gap: 16px;
             flex-shrink: 0;
         }
@@ -83,10 +87,10 @@
         .main-content {
             display: grid;
             grid-template-columns: 1fr 1.5fr;
-            gap: 24px;
-            padding: 20px 24px;
+            gap: 16px;
+            padding: 12px 16px;
             flex: 1;
-            overflow: hidden;
+            min-height: 0;
         }
 
         @media (max-width: 900px) {
@@ -102,16 +106,17 @@
         .column {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
             overflow-y: auto;
-            padding-right: 8px;
+            padding-right: 4px;
+            min-height: 0;
         }
 
         .section {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 12px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 12px;
             flex-shrink: 0;
         }
 
@@ -119,7 +124,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-height: 200px;
+            min-height: 0;
         }
 
         label {
@@ -209,7 +214,7 @@
         .tool-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            gap: 6px;
         }
 
         @media (max-width: 600px) {
@@ -221,14 +226,14 @@
         .tool-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
+            gap: 6px;
+            padding: 6px 8px;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 6px;
         }
 
         .tool-item label {
-            min-width: 60px;
+            min-width: 50px;
             margin-bottom: 0;
             font-size: 11px;
         }
@@ -236,19 +241,25 @@
         .tool-item input[type="range"] {
             flex: 1;
             height: 4px;
-            max-width: 80px;
+            max-width: 70px;
         }
 
         .tool-item .slider-value {
-            font-size: 11px;
-            padding: 2px 6px;
-            min-width: 24px;
+            font-size: 10px;
+            padding: 2px 5px;
+            min-width: 22px;
         }
 
         .checkbox-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .checkbox-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
         @media (max-width: 600px) {
@@ -260,10 +271,10 @@
         .checkbox-item {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            padding: 10px 12px;
+            gap: 6px;
+            padding: 6px 8px;
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid transparent;
             cursor: pointer;
             transition: all 0.15s;
@@ -282,15 +293,15 @@
         .checkbox-item input[type="checkbox"] {
             -webkit-appearance: none;
             appearance: none;
-            width: 18px;
-            height: 18px;
-            min-width: 18px;
+            width: 14px;
+            height: 14px;
+            min-width: 14px;
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid rgba(0, 212, 255, 0.4);
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
             position: relative;
-            margin-top: 1px;
+            margin-top: 2px;
         }
 
         .checkbox-item input[type="checkbox"]:checked {
@@ -305,23 +316,24 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #000;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: bold;
         }
 
         .checkbox-content { flex: 1; }
-        .checkbox-label { color: #e0e0e0; font-size: 14px; font-weight: 600; display: block; }
-        .checkbox-desc { color: #888; font-size: 11px; margin-top: 2px; }
+        .checkbox-label { color: #e0e0e0; font-size: 12px; font-weight: 600; display: block; }
+        .checkbox-desc { color: #888; font-size: 10px; margin-top: 1px; }
 
         .button-row {
             display: flex;
             gap: 10px;
-            margin-top: 12px;
+            margin-top: 8px;
+            flex-shrink: 0;
         }
 
         button {
             flex: 1;
-            padding: 14px 20px;
+            padding: 12px 16px;
             border: none;
             border-radius: 8px;
             font-size: 14px;
@@ -378,8 +390,8 @@
         .toast.visible { opacity: 1; }
 
         .footer {
-            padding: 12px 24px;
-            font-size: 13px;
+            padding: 8px 16px;
+            font-size: 12px;
             color: #666;
             display: flex;
             justify-content: space-between;
@@ -445,7 +457,7 @@
         <div class="column">
             <div class="section">
                 <label>Your Task</label>
-                <textarea id="task-input" placeholder="Describe what you want to build or fix..." style="height: 140px;"></textarea>
+                <textarea id="task-input" placeholder="Describe what you want to build or fix..." style="height: 100px;"></textarea>
             </div>
 
             <div class="section flex-grow">
@@ -476,51 +488,27 @@
         // Tool definitions per platform
         var toolDefinitions = {
             claude_code: [
-                { id: 'read', name: 'Read' },
-                { id: 'edit', name: 'Edit' },
-                { id: 'write', name: 'Write' },
-                { id: 'bash', name: 'Bash' },
-                { id: 'glob', name: 'Glob' },
-                { id: 'grep', name: 'Grep' },
-                { id: 'task', name: 'Task' },
-                { id: 'websearch', name: 'Web' },
-                { id: 'todowrite', name: 'Todo' }
+                { id: 'read', name: 'Read' }, { id: 'edit', name: 'Edit' }, { id: 'write', name: 'Write' },
+                { id: 'bash', name: 'Bash' }, { id: 'glob', name: 'Glob' }, { id: 'grep', name: 'Grep' },
+                { id: 'task', name: 'Task' }, { id: 'websearch', name: 'WebSearch' }, { id: 'webfetch', name: 'WebFetch' },
+                { id: 'todowrite', name: 'Todo' }, { id: 'askuser', name: 'AskUser' }, { id: 'notebookedit', name: 'Notebook' }
             ],
             codex: [
-                { id: 'shell', name: 'Shell' },
-                { id: 'patch', name: 'Patch' },
-                { id: 'read', name: 'Read' },
-                { id: 'write', name: 'Write' },
-                { id: 'plan', name: 'Plan' }
+                { id: 'shell', name: 'Shell' }, { id: 'patch', name: 'Patch' }, { id: 'view_image', name: 'ViewImage' },
+                { id: 'update_plan', name: 'Plan' }, { id: 'mcp', name: 'MCP' }
             ]
         };
 
         // Behavior options
         var behaviorOptions = [
-            {
-                id: 'noStalling',
-                label: 'No Stalling',
-                desc: 'Complete without pausing',
-                instruction: 'Do NOT pause to summarize or wait for confirmation. Complete the entire task.'
-            },
-            {
-                id: 'askFirst',
-                label: 'Ask First',
-                desc: 'Clarify before coding',
-                instruction: 'Before implementing, ask 3-5 clarifying questions about requirements.'
-            },
-            {
-                id: 'tightScope',
-                label: 'Tight Scope',
-                desc: 'Minimal implementation',
-                instruction: 'Implement ONLY what is requested. Keep the solution minimal.'
-            },
-            {
-                id: 'exploreFirst',
-                label: 'Explore First',
-                desc: 'Understand codebase',
-                instruction: 'BEFORE writing code, explore the codebase to understand patterns.'
-            }
+            { id: 'noStalling', label: 'No Stalling', desc: 'Complete without pausing', instruction: 'Do NOT pause to summarize or wait for confirmation. Complete the entire task.' },
+            { id: 'askFirst', label: 'Ask First', desc: 'Clarify before coding', instruction: 'Before implementing, ask 3-5 clarifying questions about requirements.' },
+            { id: 'tightScope', label: 'Tight Scope', desc: 'Minimal changes only', instruction: 'Implement ONLY what is requested. Do not refactor, add comments, or improve surrounding code.' },
+            { id: 'exploreFirst', label: 'Explore First', desc: 'Understand codebase', instruction: 'BEFORE writing code, explore the codebase to understand patterns and architecture.' },
+            { id: 'commitOften', label: 'Commit Often', desc: 'Small atomic commits', instruction: 'Make small, atomic commits after each logical change. Commit early and often.' },
+            { id: 'testFirst', label: 'Test First', desc: 'TDD approach', instruction: 'Write tests BEFORE implementing the feature. Follow test-driven development.' },
+            { id: 'noComments', label: 'No Comments', desc: 'Skip documentation', instruction: 'Do not add comments, docstrings, or documentation unless explicitly requested.' },
+            { id: 'dryRun', label: 'Dry Run', desc: 'Explain without doing', instruction: 'Explain what you WOULD do step by step, but do not actually make any changes.' }
         ];
 
         // Helper to clear element children safely
